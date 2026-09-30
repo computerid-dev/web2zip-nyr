@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web2Apk Nyr-Dev</title>
+<style>
+:root{--bg:#f4efe6;--ink:#111;--card:#fff;--y:#ffd93d;--b:#7aa7ff;--g:#7ddc8a;--r:#ff6b6b;--bd:3px solid var(--ink);--sh:5px 5px 0 var(--ink)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Trebuchet MS",system-ui,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:16px}
+header{background:var(--y);border:var(--bd);box-shadow:var(--sh);padding:14px 16px;margin-bottom:18px}
+h1{margin:0;font-size:24px;text-transform:uppercase;letter-spacing:.5px}
+header p{margin:4px 0 0;font-size:13px}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.tab{flex:1;min-width:100px;font:inherit;font-weight:700;background:var(--card);border:var(--bd);padding:10px;cursor:pointer;border-radius:4px;transition:transform .1s}
+.tab:hover{transform:translate(-1px,-1px)}
+.tab.on{background:var(--b);box-shadow:3px 3px 0 var(--ink)}
+.card{background:var(--card);border:var(--bd);box-shadow:var(--sh);padding:16px;margin-bottom:18px;border-radius:4px}
+.card h2{margin:0 0 12px;font-size:18px;text-transform:uppercase}
+label{display:block;font-weight:700;margin:12px 0 4px;font-size:13px}
+input[type=text],input[type=password],input[type=url]{width:100%;font:inherit;padding:10px;border:var(--bd);border-radius:4px;background:#fff}
+input:focus{outline:none;background:#fffbe0;box-shadow:3px 3px 0 var(--ink)}
+input[type=file]{width:100%;font:inherit;padding:8px;border:2px dashed var(--ink);border-radius:4px;background:#fafafa}
+.hint{font-size:12px;color:#444;margin-top:3px}
+.seg{display:flex;gap:8px}
+.seg label{flex:1;margin:0;border:var(--bd);padding:10px;text-align:center;cursor:pointer;border-radius:4px;background:#fff}
+.seg input{display:none}
+.seg label:has(input:checked){background:var(--g);box-shadow:3px 3px 0 var(--ink)}
+.btn{font:inherit;font-weight:800;text-transform:uppercase;background:var(--y);border:var(--bd);padding:12px 18px;cursor:pointer;box-shadow:4px 4px 0 var(--ink);border-radius:4px;transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink)}
+.btn:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.g{background:var(--g)}.btn.b{background:var(--b)}.btn.r{background:var(--r)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.hide{display:none}
+#prev{width:84px;height:84px;border:var(--bd);background:#eee;object-fit:cover;border-radius:4px;display:block;margin-top:8px}
+#log{list-style:none;margin:0;padding:0;font-family:Consolas,monospace;font-size:13px}
+#log li{border:2px solid var(--ink);padding:7px 10px;margin-bottom:6px;background:#fff;border-radius:4px;word-break:break-word}
+#log li.run{background:var(--y)}#log li.ok{background:var(--g)}#log li.err{background:var(--r)}
+.note{border:var(--bd);background:#fff3bf;padding:10px;font-size:13px;border-radius:4px}
+a{color:var(--ink);font-weight:700}
+.tag{display:inline-block;background:var(--ink);color:#fff;font-size:11px;padding:2px 6px;margin-left:6px;vertical-align:middle}
+.pk{display:flex}.pk span{display:flex;align-items:center;padding:0 8px;background:var(--y);border:var(--bd);border-right:0;border-radius:4px 0 0 4px;font-family:Consolas,monospace;font-size:13px;font-weight:700;white-space:nowrap}.pk input{flex:1;min-width:0;border-radius:0 4px 4px 0}
+footer{border:var(--bd);background:#fff;box-shadow:var(--sh);padding:10px 14px;font-size:13px;margin-bottom:18px;border-radius:4px}
+@media(max-width:520px){h1{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>Web2Apk Nyr-Dev <span class="tag">v0.2 DEV</span></h1><p>Ubah link web / file HTML jadi APK. Build otomatis lewat GitHub Actions.</p></header>
+
+<div class="tabs">
+<button class="tab on" data-tab="build">Buat APK</button>
+<button class="tab" data-tab="setup">Setup</button>
+<button class="tab" data-tab="data">Import / Export</button>
+</div>
+
+<!-- BUILD -->
+<section id="t-build">
+<div class="card">
+<h2>Buat APK</h2>
+<div class="seg">
+<label><input type="radio" name="mode" value="link" checked>Pilih Link</label>
+<label><input type="radio" name="mode" value="html">Pilih File HTML</label>
+</div>
+<div id="m-link"><label for="url">Link Website (https)</label><input type="url" id="url" placeholder="https://contoh.com/"></div>
+<div id="m-html" class="hide"><label for="htmlfile">File HTML</label><input type="file" id="htmlfile" accept=".html,.htm,text/html"><div class="hint">Dibungkus index.html, lalu dibuka lokal di dalam app.</div></div>
+<label for="icon">Icon App (gambar apa saja, otomatis jadi 512x512)</label>
+<input type="file" id="icon" accept="image/*"><img id="prev" class="hide" alt="preview icon">
+<label for="appname">Nama App</label><input type="text" id="appname" maxlength="50" placeholder="Toko Saya">
+<label for="pkg">Package Name</label><div class="pk"><span>com.webapp.nyr.</span><input type="text" id="pkg" placeholder="namaapp" autocapitalize="none"></div>
+<div class="hint">Awalan <b>com.webapp.nyr.</b> terkunci (watermark). Isi bagian belakangnya saja: huruf kecil, angka, underscore, diawali huruf.</div>
+<label for="repo">Nama Repo (wajib diisi manual, akan dibuat baru)</label><input type="text" id="repo" placeholder="nama-repo-kamu" autocapitalize="none">
+<div class="row"><button class="btn g" id="go">Selesai &amp; Buat</button></div>
+</div>
+<div class="card hide" id="prog"><h2>Progres</h2><ul id="log"></ul><div id="result"></div></div>
+<div class="note">Catatan: bungkus situs orang lain bisa melanggar aturan situs tersebut, dan Play Store biasanya menolak app model begini. Pakai untuk keperluan pribadi.</div>
+</section>
+
+<!-- SETUP -->
+<section id="t-setup" class="hide">
+<div class="card">
+<h2>Setup (sekali saja)</h2>
+<label for="user">Username GitHub</label><input type="text" id="user" autocapitalize="none" placeholder="computerid-dev">
+<label for="token">Token Akses (Fine-grained)</label><input type="password" id="token" placeholder="github_pat_...">
+<div class="hint">Izin: Administration, Contents, Actions, Workflows (Read and write), Metadata (Read).</div>
+<label for="tpl">Repo Template</label><input type="text" id="tpl" placeholder="pemilik/nama-repo">
+<div class="row"><button class="btn b" id="save">Simpan</button><button class="btn" id="test">Tes Koneksi</button><button class="btn r" id="wipe">Hapus Data</button></div>
+<p id="setupmsg" class="hint"></p>
+</div>
+</section>
+
+<!-- DATA -->
+<section id="t-data" class="hide">
+<div class="card">
+<h2>Export (dienkripsi)</h2>
+<label for="expw">Password file</label><input type="password" id="expw" placeholder="minimal 6 karakter">
+<div class="row"><button class="btn b" id="exp">Export</button></div>
+</div>
+<div class="card">
+<h2>Import</h2>
+<label for="impf">File backup (.w2a)</label><input type="file" id="impf" accept=".w2a,application/json">
+<label for="impw">Password file</label><input type="password" id="impw">
+<div class="row"><button class="btn g" id="imp">Import</button></div>
+<p id="datamsg" class="hint"></p>
+</div>
+</section>
+<footer><b>Web2Apk Nyr-Dev</b><br>Developer: Nugroho Keren<br>Nama dev: Nugroho Y.R. Dev</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var KEY="web2apk.cfg",cfg={},iconB64="";
+try{cfg=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){cfg={}}
+var DEFAULT_TPL="computerid-dev/webtoapk-templates-nyr";
+if(cfg.template==="computerid-dev/webtoapk-template")cfg.template=DEFAULT_TPL;
+var PFX="com.webapp.nyr.";
+var KW="abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try void volatile while".split(" ");
+
+/* ---------- UI dasar ---------- */
+document.querySelectorAll(".tab").forEach(function(t){t.onclick=function(){
+  document.querySelectorAll(".tab").forEach(function(x){x.classList.toggle("on",x===t)});
+  ["build","setup","data"].forEach(function(n){$("#t-"+n).classList.toggle("hide",n!==t.dataset.tab)});
+}});
+document.querySelectorAll("input[name=mode]").forEach(function(r){r.onchange=function(){
+  var m=document.querySelector("input[name=mode]:checked").value;
+  $("#m-link").classList.toggle("hide",m!=="link");$("#m-html").classList.toggle("hide",m!=="html");
+}});
+function fillSetup(){$("#user").value=cfg.username||"";$("#token").value=cfg.token||"";$("#tpl").value=cfg.template||DEFAULT_TPL}
+fillSetup();
+
+function slug(s){return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
+$("#appname").oninput=function(){
+  var s=slug(this.value);
+  if(!$("#pkg").dataset.t)$("#pkg").value=s?s.replace(/-/g,"").replace(/^[0-9]+/,""):"";
+};
+$("#pkg").oninput=function(){this.dataset.t=1};
+
+/* ---------- Setup ---------- */
+$("#save").onclick=function(){
+  cfg.username=$("#user").value.trim();cfg.token=$("#token").value.trim();cfg.template=$("#tpl").value.trim()||DEFAULT_TPL;
+  localStorage.setItem(KEY,JSON.stringify(cfg));$("#setupmsg").textContent="Tersimpan. Tidak perlu setup ulang.";
+};
+$("#wipe").onclick=function(){if(confirm("Hapus semua data tersimpan?")){localStorage.removeItem(KEY);cfg={};fillSetup();$("#setupmsg").textContent="Data dihapus."}};
+$("#test").onclick=async function(){
+  $("#save").click();var m=$("#setupmsg");m.textContent="Mengecek...";
+  try{
+    var u=await gh("GET","/user");if(!u.ok)throw new Error("Token ditolak ("+u.status+")");
+    var t=await gh("GET","/repos/"+cfg.template);
+    if(!t.ok)throw new Error("Repo template tidak ketemu ("+t.status+")");
+    m.textContent="OK. Login sebagai "+u.data.login+(t.data.is_template?". Template valid.":". PERINGATAN: repo belum dicentang 'Template repository'.");
+  }catch(e){m.textContent="Gagal: "+e.message}
+};
+
+/* ---------- GitHub API ---------- */
+async function gh(method,path,body){
+  var h={Authorization:"Bearer "+cfg.token,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+  if(body)h["Content-Type"]="application/json";
+  var r=await fetch("https://api.github.com"+path,{method:method,headers:h,body:body?JSON.stringify(body):undefined});
+  var d=null;try{d=await r.json()}catch(e){}
+  return{ok:r.ok,status:r.status,data:d};
+}
+var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+async function retry(fn,n,ms){var last;for(var i=0;i<n;i++){try{return await fn()}catch(e){last=e;await sleep(ms)}}throw last}
+
+/* ---------- Helper file ---------- */
+function b64text(s){return btoa(unescape(encodeURIComponent(s)))}
+function escAttr(s){return s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function wrapper(target){
+  var j=JSON.stringify(target).replace(/</g,"\\u003c");
+  return '<!DOCTYPE html>\n<html>\n<head>\n<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">\n'
+   +'<meta http-equiv="Refresh" content="0; url=\''+escAttr(target)+'\'" />\n'
+   +'<script>window.location.replace('+j+');<\/script>\n</head>\n'
+   +'<body style="margin:0;padding:0;background-color:#ffffff;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">\nRedirecting...\n</body>\n</html>\n';
+}
+$("#icon").onchange=function(){
+  var f=this.files[0];if(!f)return;
+  var img=new Image(),u=URL.createObjectURL(f);
+  img.onload=function(){
+    var c=document.createElement("canvas");c.width=c.height=512;var x=c.getContext("2d");
+    var s=Math.min(img.width,img.height),sx=(img.width-s)/2,sy=(img.height-s)/2;
+    x.drawImage(img,sx,sy,s,s,0,0,512,512);
+    var d=c.toDataURL("image/png");iconB64=d.split(",")[1];
+    $("#prev").src=d;$("#prev").classList.remove("hide");URL.revokeObjectURL(u);
+  };
+  img.onerror=function(){iconB64="";alert("Gambar tidak bisa dibaca")};
+  img.src=u;
+};
+function readB64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(",")[1])};r.onerror=rej;r.readAsDataURL(file)})}
+
+/* ---------- Log ---------- */
+var logEl=$("#log");
+function step(text,cls){var li=document.createElement("li");li.className=cls||"run";li.textContent=text;logEl.appendChild(li);return li}
+function mark(li,text,cls){li.className=cls;if(text)li.textContent=text}
+
+/* ---------- Build ---------- */
+$("#go").onclick=async function(){
+  var btn=this;logEl.innerHTML="";$("#result").innerHTML="";
+  try{
+    if(!cfg.token||!cfg.username)throw new Error("Isi tab Setup dulu (username & token).");
+    var mode=document.querySelector("input[name=mode]:checked").value;
+    var name=$("#appname").value.trim(),sfx=$("#pkg").value.trim().toLowerCase(),repo=$("#repo").value.trim();
+    if(sfx.indexOf(PFX)===0)sfx=sfx.slice(PFX.length);
+    var pkg=PFX+sfx;
+    if(!name)throw new Error("Nama app kosong.");
+    if(!sfx||!/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$/.test(sfx)||sfx.split(".").some(function(x){return KW.indexOf(x)>=0}))throw new Error("Package name tidak valid. Isi bagian belakang saja, contoh: tokosaya");
+    if(!repo)throw new Error("Nama repo wajib diisi.");
+    if(!/^[A-Za-z0-9._-]{1,80}$/.test(repo))throw new Error("Nama repo hanya boleh huruf, angka, titik, minus, underscore.");
+    if(!iconB64)throw new Error("Pilih gambar icon dulu.");
+    var files={},target;
+    if(mode==="link"){
+      var u;try{u=new URL($("#url").value.trim())}catch(e){throw new Error("Link tidak valid.")}
+      if(u.protocol!=="https:")throw new Error("Link harus diawali https://");
+      target=u.href;files["www/index.html"]=b64text(wrapper(target));files["www/url.txt"]=b64text(target+"\n");
+    }else{
+      var f=$("#htmlfile").files[0];if(!f)throw new Error("Pilih file HTML dulu.");
+      if(f.size>20*1024*1024)throw new Error("File HTML terlalu besar (maks 20 MB).");
+      files["www/app.html"]=await readB64(f);
+      files["www/index.html"]=b64text(wrapper("app.html"));
+      files["www/url.txt"]=b64text("https://appassets.androidplatform.net/assets/www/app.html\n");
+    }
+    files["config/app.json"]=b64text(JSON.stringify({appName:name,packageName:pkg},null,2)+"\n");
+    files["config/icon.png"]=iconB64;
+
+    btn.disabled=true;$("#prog").classList.remove("hide");
+    var owner=cfg.username,tpl=cfg.template||DEFAULT_TPL,start=new Date(Date.now()-60000).toISOString();
+
+    var s=step("1/6 Membuat repo "+owner+"/"+repo+" dari template...");
+    var r=await gh("POST","/repos/"+tpl+"/generate",{owner:owner,name:repo,description:"Web2APK: "+name,private:false});
+    if(!r.ok)throw new Error("Gagal bikin repo ("+r.status+"): "+(r.data&&r.data.message||"?")+(r.status===422?" (nama repo mungkin sudah dipakai)":""));
+    var branch=r.data.default_branch||"main";mark(s,"1/6 Repo dibuat.","ok");
+
+    s=step("2/6 Menunggu repo siap...");
+    await retry(async function(){var x=await gh("GET","/repos/"+owner+"/"+repo+"/contents/config/app.json?ref="+branch);if(!x.ok)throw new Error("belum siap")},15,3000);
+    mark(s,"2/6 Repo siap.","ok");
+
+    s=step("3/6 Mengunggah file konfigurasi...");
+    for(var p in files){
+      await retry(async function(){
+        var path="/repos/"+owner+"/"+repo+"/contents/"+p;
+        var g=await gh("GET",path+"?ref="+branch),body={message:"Web2APK: "+p,content:files[p],branch:branch};
+        if(g.ok&&g.data&&g.data.sha)body.sha=g.data.sha;
+        var put=await gh("PUT",path,body);if(!put.ok)throw new Error("Gagal unggah "+p+" ("+put.status+"): "+(put.data&&put.data.message))
+      },3,2000);
+    }
+    mark(s,"3/6 File terunggah.","ok");
+
+    s=step("4/6 Menjalankan workflow...");
+    await retry(async function(){
+      var d=await gh("POST","/repos/"+owner+"/"+repo+"/actions/workflows/build-apk.yml/dispatches",{ref:branch,inputs:{build_id:String(Date.now())}});
+      if(!d.ok)throw new Error("Workflow gagal dijalankan ("+d.status+"): "+(d.data&&d.data.message))
+    },10,4000);
+    mark(s,"4/6 Workflow berjalan.","ok");
+
+    s=step("5/6 Build berjalan... (3-6 menit)");
+    var run=null,t0=Date.now();
+    while(Date.now()-t0<20*60000){
+      await sleep(6000);
+      var q=await gh("GET","/repos/"+owner+"/"+repo+"/actions/runs?event=workflow_dispatch&per_page=5");
+      if(q.ok&&q.data.workflow_runs){
+        run=q.data.workflow_runs.filter(function(w){return w.created_at>=start})[0]||null;
+        if(run){s.textContent="5/6 Build: "+run.status+" ("+Math.round((Date.now()-t0)/1000)+" dtk)";if(run.status==="completed")break}
+      }
+    }
+    if(!run||run.status!=="completed")throw new Error("Build kelamaan atau tidak ketemu. Cek tab Actions di repo.");
+    if(run.conclusion!=="success"){mark(s,"5/6 Build gagal.","err");throw new Error('Build gagal ('+run.conclusion+'). Lihat log: '+run.html_url)}
+    mark(s,"5/6 Build sukses.","ok");
+
+    s=step("6/6 Mengambil APK...");
+    var rel=await retry(async function(){
+      var x=await gh("GET","/repos/"+owner+"/"+repo+"/releases/tags/build-"+run.run_number);
+      if(!x.ok)throw new Error("Release belum ada");return x.data
+    },10,4000);
+    var a=(rel.assets||[]).filter(function(z){return z.name==="app-debug.apk"})[0];
+    if(!a)throw new Error("File app-debug.apk tidak ada di release.");
+    mark(s,"6/6 Selesai!","ok");
+    $("#result").innerHTML='<div class="row"><a class="btn g" style="text-decoration:none" href="'+escAttr(a.browser_download_url)+'">Download app-debug.apk</a>'
+      +'<a class="btn" style="text-decoration:none" target="_blank" rel="noopener" href="'+escAttr(rel.html_url)+'">Buka Release</a></div>';
+  }catch(e){
+    step("ERROR: "+e.message,"err");
+  }finally{btn.disabled=false}
+};
+
+/* ---------- Import / Export terenkripsi ---------- */
+var enc=new TextEncoder(),dec=new TextDecoder();
+function toB64(u8){var s="";u8.forEach(function(b){s+=String.fromCharCode(b)});return btoa(s)}
+function fromB64(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0)})}
+async function deriveKey(pw,salt){
+  var base=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:200000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+$("#exp").onclick=async function(){
+  var m=$("#datamsg"),pw=$("#expw").value;
+  try{
+    if(!cfg.token)throw new Error("Belum ada data Setup untuk diexport.");
+    if(pw.length<6)throw new Error("Password minimal 6 karakter.");
+    var salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+    var key=await deriveKey(pw,salt);
+    var ct=await crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,enc.encode(JSON.stringify(cfg)));
+    var out=JSON.stringify({v:1,salt:toB64(salt),iv:toB64(iv),data:toB64(new Uint8Array(ct))});
+    var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out],{type:"application/json"}));
+    a.download="web2apk-backup.w2a";document.body.appendChild(a);a.click();a.remove();
+    m.textContent="Backup terenkripsi diunduh. Simpan passwordnya, tidak bisa dipulihkan.";
+  }catch(e){m.textContent="Gagal: "+e.message}
+};
+$("#imp").onclick=async function(){
+  var m=$("#datamsg");
+  try{
+    var f=$("#impf").files[0];if(!f)throw new Error("Pilih file backup dulu.");
+    var o=JSON.parse(await f.text());
+    var key=await deriveKey($("#impw").value,fromB64(o.salt));
+    var pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB64(o.iv)},key,fromB64(o.data));
+    var d=JSON.parse(dec.decode(pt));
+    cfg={username:String(d.username||""),token:String(d.token||""),template:String(d.template||DEFAULT_TPL)};
+    localStorage.setItem(KEY,JSON.stringify(cfg));fillSetup();m.textContent="Import berhasil. Data Setup sudah terisi.";
+  }catch(e){m.textContent="Gagal import (password salah atau file rusak)."}
+};
+})();
+</script>
+</body>
+</html>
